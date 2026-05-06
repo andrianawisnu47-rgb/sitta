@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Informasi Stok Bahan Ajar — SITTA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #f5f4f0;
+      --surface:      #ffffff;
+      --surface2:     #eeecea;
+      --border:       #e0ddd8;
+      --accent:       #1a3a5c;
+      --accent2:      #2a5f8f;
+      --accent-light: #e8f0f8;
+      --text:         #1c1c1e;
+      --muted:        #6b6b72;
+      --green:        #1e5c3a;
+      --green-l:      #e6f5ee;
+      --green-m:      #b8e0ca;
+      --orange:       #b85c00;
+      --orange-l:     #fff3e6;
+      --red:          #8c1a1a;
+      --red-l:        #fdf0f0;
+      --purple:       #3a1a5c;
+      --purple-l:     #f0e8f8;
+      --blue-l:       #e8f0f8;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+    }
+
+    /* ═══════════════════════════════
+       TOPBAR  (identik dengan dashboard)
+    ═══════════════════════════════ */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .back-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--muted); text-decoration: none;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 5px 12px;
+      transition: all 0.2s; font-weight: 500;
+    }
+    .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px; font-weight: 700; letter-spacing: 3px;
+      color: var(--accent); display: flex; align-items: center; gap: 8px;
+    }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .time-chip {
+      font-size: 12px; color: var(--muted);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 12px;
+      font-family: 'Space Mono', monospace; letter-spacing: 0.5px;
+    }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logout-btn {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 12px; color: var(--muted);
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px; padding: 5px 12px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ═══════════════════════════════
+       PAGE HEADER BAR
+    ═══════════════════════════════ */
+    .page-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .page-header-left { display: flex; align-items: center; gap: 12px; }
+    .page-header-icon {
+      width: 42px; height: 42px; border-radius: 11px;
+      background: var(--accent-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .page-header-title { font-size: 17px; font-weight: 800; color: var(--text); }
+    .page-header-sub   { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+    .add-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 10px; padding: 10px 20px;
+      font-size: 13.5px; font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .add-btn:hover  { background: var(--accent2); }
+    .add-btn:active { transform: scale(0.97); }
+
+    /* ═══════════════════════════════
+       MAIN WRAPPER
+    ═══════════════════════════════ */
+    .main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 28px 24px 80px;
+    }
+
+    /* ═══════════════════════════════
+       SUMMARY STRIP  (pakai gaya stat-card dari dashboard)
+    ═══════════════════════════════ */
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .sum-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      animation: fadeUp 0.45s ease both;
+    }
+    .sum-card:nth-child(1){animation-delay:.04s}
+    .sum-card:nth-child(2){animation-delay:.08s}
+    .sum-card:nth-child(3){animation-delay:.12s}
+    .sum-card:nth-child(4){animation-delay:.16s}
+    .sum-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .sum-label { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+    .sum-value { font-size: 20px; font-weight: 800; color: var(--text); }
+
+    /* ═══════════════════════════════
+       TOOLBAR  (search + filter)
+    ═══════════════════════════════ */
+    .toolbar {
+      display: flex; gap: 10px; align-items: center;
+      margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .search-wrap { flex: 1; min-width: 220px; position: relative; }
+    .search-wrap svg {
+      position: absolute; left: 12px; top: 50%;
+      transform: translateY(-50%); color: var(--muted); pointer-events: none;
+    }
+    .search-box {
+      width: 100%; height: 40px;
+      border: 1.5px solid var(--border); border-radius: 9px;
+      padding: 0 14px 0 38px;
+      font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--surface); color: var(--text); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-box:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(42,95,143,0.1);
+    }
+    .search-box::placeholder { color: #bbb; }
+    .filter-select {
+      height: 40px; padding: 0 28px 0 12px;
+      border: 1.5px solid var(--border); border-radius: 9px;
+      font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--surface); color: var(--text);
+      outline: none; cursor: pointer; transition: border-color 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b72' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+    }
+    .filter-select:focus { border-color: var(--accent2); }
+    .count-label {
+      font-size: 12px; color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      white-space: nowrap; padding: 0 4px;
+    }
+
+    /* ═══════════════════════════════
+       TABLE
+    ═══════════════════════════════ */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+      animation-delay: 0.1s;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr {
+      background: var(--surface2);
+      border-bottom: 1.5px solid var(--border);
+    }
+    th {
+      padding: 11px 14px; text-align: left;
+      font-size: 10.5px; font-weight: 700;
+      letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--muted); white-space: nowrap;
+      cursor: pointer; user-select: none; transition: color 0.15s;
+    }
+    th:hover { color: var(--accent); }
+    th.sorted { color: var(--accent); }
+    th .sort-arrow { margin-left: 4px; opacity: 0.4; font-size: 10px; }
+    th.sorted .sort-arrow { opacity: 1; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafaf8; }
+    tbody tr.new-row {
+      animation: rowIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes rowIn {
+      from { opacity:0; transform:translateY(-6px) scaleY(0.85); background:var(--accent-light); }
+      to   { opacity:1; transform:none; }
+    }
+    td { padding: 11px 14px; vertical-align: middle; }
+
+    /* Cell styles */
+    .td-lokasi {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; font-weight: 700;
+      color: var(--accent2); white-space: nowrap;
+    }
+    .td-kode {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: var(--muted); white-space: nowrap;
+    }
+    .td-nama { font-weight: 600; color: var(--text); line-height: 1.4; }
+    .td-mk   { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
+
+    .badge-jenis {
+      display: inline-flex; align-items: center; gap: 4px;
+      border-radius: 6px; padding: 3px 9px;
+      font-size: 11px; font-weight: 600; white-space: nowrap;
+    }
+    .jenis-cetak         { background: var(--blue-l);   color: var(--accent); }
+    .jenis-digital       { background: var(--purple-l); color: var(--purple); }
+    .jenis-cetak-digital { background: var(--green-l);  color: var(--green);  }
+
+    .td-edisi { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+    /* Stok mini bar */
+    .stok-wrap { min-width: 90px; }
+    .stok-num  { font-size: 14px; font-weight: 800; color: var(--text); }
+    .stok-bar-bg   { height: 4px; border-radius: 2px; margin-top: 5px; background: var(--border); overflow: hidden; }
+    .stok-bar-fill { height: 100%; border-radius: 2px; transition: width 0.7s ease; }
+    .stok-warn { font-size: 10px; color: var(--orange); margin-top: 2px; font-weight: 600; }
+
+    /* Status badge */
+    .badge-status {
+      display: inline-flex; align-items: center; gap: 5px;
+      border-radius: 20px; padding: 4px 10px;
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .badge-status::before { content:''; width:6px; height:6px; border-radius:50%; }
+    .s-tersedia { background:var(--green-l);  color:var(--green);  }
+    .s-tersedia::before { background:var(--green); }
+    .s-terbatas { background:var(--orange-l); color:var(--orange); }
+    .s-terbatas::before { background:var(--orange); animation: blink 1.4s infinite; }
+    .s-habis    { background:var(--red-l);    color:var(--red);    }
+    .s-habis::before    { background:var(--red); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .td-harga {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap;
+    }
+    .btn-delete {
+      background: none; border: 1px solid var(--border);
+      border-radius: 7px; padding: 4px 8px;
+      cursor: pointer; color: var(--muted); font-size: 13px;
+      transition: all 0.2s;
+    }
+    .btn-delete:hover { border-color:var(--red); color:var(--red); background:var(--red-l); }
+
+    /* ═══════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════ */
+    .empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
+    .empty-state .ei { font-size:48px; margin-bottom:12px; }
+    .empty-state p   { font-size:14px; }
+
+    /* ═══════════════════════════════
+       MODAL TAMBAH
+    ═══════════════════════════════ */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(28,28,30,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+    .modal {
+      background: var(--surface); border-radius: 18px;
+      width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.16);
+      animation: modalUp 0.3s cubic-bezier(0.34,1.3,0.64,1) both;
+    }
+    @keyframes modalUp { from{opacity:0;transform:scale(0.93) translateY(20px)} to{opacity:1;transform:none} }
+
+    .modal-header {
+      padding: 22px 24px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-title { font-size: 17px; font-weight: 800; color: var(--text); }
+    .modal-close {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px; color: var(--muted); transition: all 0.2s;
+    }
+    .modal-close:hover { background:var(--red-l); color:var(--red); border-color:var(--red); }
+
+    .modal-body { padding: 20px 24px 8px; }
+    .form-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-field { display: flex; flex-direction: column; gap: 6px; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-label {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--muted);
+    }
+    .form-input, .form-select {
+      height: 42px; border: 1.5px solid var(--border); border-radius: 9px;
+      padding: 0 13px; font-size: 13.5px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text); background: var(--bg); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(42,95,143,0.1); background: #fff;
+    }
+    .form-input.err { border-color: var(--red); }
+    .form-err { font-size: 11px; color: var(--red); display: none; }
+    .form-err.show { display: block; }
+
+    .modal-footer {
+      padding: 16px 24px 22px;
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+    .btn-cancel {
+      height: 42px; padding: 0 20px; background: none;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 13.5px; font-weight: 600;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--muted); cursor: pointer; transition: all 0.2s;
+    }
+    .btn-cancel:hover { border-color:var(--accent); color:var(--accent); }
+    .btn-submit {
+      height: 42px; padding: 0 24px;
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 10px; font-size: 13.5px; font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .btn-submit:hover  { background: var(--accent2); }
+    .btn-submit:active { transform: scale(0.97); }
+
+    /* ═══════════════════════════════
+       TOAST
+    ═══════════════════════════════ */
+    .toast-container {
+      position: fixed; bottom: 28px; right: 24px; z-index: 300;
+      display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+    }
+    .toast {
+      color: #fff; border-radius: 12px; padding: 12px 18px;
+      font-size: 13.5px; font-weight: 600;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      animation: toastIn 0.35s cubic-bezier(0.34,1.4,0.64,1) both;
+      pointer-events: all;
+    }
+    @keyframes toastIn { from{opacity:0;transform:translateY(16px) scale(0.92)} to{opacity:1;transform:none} }
+
+    /* ═══════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════ */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+
+    /* ═══════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════ */
+    @media (max-width: 900px) {
+      .summary-strip { grid-template-columns: repeat(2,1fr); }
+      .td-kode, .td-edisi, .td-harga { display:none; }
+    }
+    @media (max-width: 640px) {
+      .topbar, .page-header { padding: 0 16px; }
+      .page-header { padding: 14px 16px; }
+      .main { padding: 16px 12px 60px; }
+      .summary-strip { grid-template-columns: 1fr 1fr; }
+      .logout-btn { display: none; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-field.full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-btn" href="dashboard.html">← Kembali</a>
+    <div class="logo"><div class="logo-dot"></div>SITTA</div>
+  </div>
+  <div class="topbar-right">
+    <div class="time-chip" id="liveClock">00:00:00</div>
+    <div class="avatar" id="avatarInitial">AD</div>
+    <button class="logout-btn" onclick="location.href='login.html'">Keluar ↗</button>
+  </div>
+</header>
+
+<!-- ══ PAGE HEADER ══ -->
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="page-header-icon">📚</div>
+    <div>
+      <div class="page-header-title">Informasi Stok Bahan Ajar</div>
+      <div class="page-header-sub">Data stok real-time dari semua lokasi gudang</div>
+    </div>
+  </div>
+  <button class="add-btn" onclick="openModal()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    Tambah Bahan Ajar
+  </button>
+</div>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+  <!-- Summary strip (diisi JS) -->
+  <div class="summary-strip" id="summaryStrip"></div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input class="search-box" id="searchBox" placeholder="Cari nama, kode barang, atau kode lokasi…"/>
+    </div>
+    <select class="filter-select" id="filterLokasi">
+      <option value="">Semua Lokasi</option>
+    </select>
+    <select class="filter-select" id="filterJenis">
+      <option value="">Semua Jenis</option>
+      <option value="Cetak">Cetak</option>
+      <option value="Digital">Digital</option>
+      <option value="Cetak & Digital">Cetak &amp; Digital</option>
+    </select>
+    <select class="filter-select" id="filterStatus">
+      <option value="">Semua Status</option>
+      <option value="Tersedia">Tersedia</option>
+      <option value="Terbatas">Terbatas</option>
+      <option value="Habis">Habis</option>
+    </select>
+    <span class="count-label" id="countLabel">— item</span>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th data-col="kode_lokasi">Kode Lokasi <span class="sort-arrow">↕</span></th>
+          <th data-col="kode_barang">Kode Barang <span class="sort-arrow">↕</span></th>
+          <th data-col="nama">Nama / Judul <span class="sort-arrow">↕</span></th>
+          <th data-col="jenis">Jenis</th>
+          <th data-col="edisi">Edisi</th>
+          <th data-col="stok">Stok <span class="sort-arrow">↕</span></th>
+          <th data-col="harga">Harga <span class="sort-arrow">↕</span></th>
+          <th data-col="status">Status <span class="sort-arrow">↕</span></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="ei">🔍</div>
+      <p>Tidak ada data yang cocok dengan filter ini.</p>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ MODAL TAMBAH ══ -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="onBackdropClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✚ Tambah Bahan Ajar</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <div class="form-field">
+          <label class="form-label">Kode Lokasi *</label>
+          <select class="form-select" id="fLokasi">
+            <option value="">Pilih Lokasi</option>
+            <option value="OTMP-01">OTMP-01</option>
+            <option value="OTMP-02">OTMP-02</option>
+            <option value="OTMP-03">OTMP-03</option>
+          </select>
+          <span class="form-err" id="eLokasi">Pilih kode lokasi.</span>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Kode Barang *</label>
+          <input class="form-input" id="fKode" placeholder="contoh: BA-013"
+            style="font-family:'Space Mono',monospace;font-size:13px;"/>
+          <span class="form-err" id="eKode">Kode barang wajib diisi.</span>
+        </div>
+
+        <div class="form-field full">
+          <label class="form-label">Nama / Judul Bahan Ajar *</label>
+          <input class="form-input" id="fNama" placeholder="contoh: Pengantar Ekonomi Makro"/>
+          <span class="form-err" id="eNama">Nama wajib diisi.</span>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Jenis *</label>
+          <select class="form-select" id="fJenis">
+            <option value="">Pilih Jenis</option>
+            <option value="Cetak">Cetak</option>
+            <option value="Digital">Digital</option>
+            <option value="Cetak & Digital">Cetak &amp; Digital</option>
+          </select>
+          <span class="form-err" id="eJenis">Pilih jenis bahan ajar.</span>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Edisi</label>
+          <input class="form-input" id="fEdisi" placeholder="Edisi 1 · 2024"/>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Stok Awal *</label>
+          <input class="form-input" id="fStok" type="number" min="0" placeholder="0"/>
+          <span class="form-err" id="eStok">Stok harus angka ≥ 0.</span>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Stok Minimum</label>
+          <input class="form-input" id="fStokMin" type="number" min="0" placeholder="30"/>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Harga (Rp)</label>
+          <input class="form-input" id="fHarga" type="number" min="0" placeholder="45000"/>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Kode MK</label>
+          <input class="form-input" id="fKodeMk" placeholder="EKMA4213"
+            style="font-family:'Space Mono',monospace;font-size:13px;"/>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-submit" onclick="submitForm()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Tambahkan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══ DATA + SCRIPT ══ -->
+<script src="data.js"></script>
+<script>
+
+const dataBahanAjar = [
+  { kode_lokasi:"OTMP-01", kode_barang:"BA-001", nama:"Pemograman Berbasis Web",             jenis:"Cetak",           edisi:"Edisi 3 · 2026", stok:320, stok_min:50,  kode_mk:"MSIM4309", fakultas:"FST",  harga:45000, status:"Tersedia" },
+  { kode_lokasi:"OTMP-01", kode_barang:"BA-002", nama:"Algoritma dan Pemograman",            jenis:"Cetak & Digital", edisi:"Edisi 5 · 2025", stok:48,  stok_min:50,  kode_mk:"MSIM4203", fakultas:"FST",  harga:38000, status:"Terbatas" },
+  { kode_lokasi:"OTMP-02", kode_barang:"BA-003", nama:"Analisis dan Visualisasi data",       jenis:"Cetak",           edisi:"Edisi 2 · 2024", stok:0,   stok_min:30,  kode_mk:"MSIM4302", fakultas:"FST",  harga:42000, status:"Habis"    },
+  { kode_lokasi:"OTMP-01", kode_barang:"BA-004", nama:"Manajemen Keuangan",                  jenis:"Cetak",           edisi:"Edisi 4 · 2024", stok:210, stok_min:40,  kode_mk:"EKMA4213", fakultas:"FEB",   harga:52000, status:"Tersedia" },
+  { kode_lokasi:"OTMP-03", kode_barang:"BA-005", nama:"Hukum Perdata",                       jenis:"Digital",         edisi:"Edisi 1 · 2025", stok:999, stok_min:0,   kode_mk:"HKUM4201", fakultas:"FHISIP", harga:30000, status:"Tersedia" },
+  { kode_lokasi:"OTMP-02", kode_barang:"BA-006", nama:"Statistika Ekonomi dan Bisnis",       jenis:"Cetak",           edisi:"Edisi 3 · 2026", stok:22,  stok_min:30,  kode_mk:"ESPA4123", fakultas:"FEB",   harga:47000, status:"Terbatas" },
+  { kode_lokasi:"OTMP-01", kode_barang:"BA-007", nama:"Komputer dan Media Pembelajaran",     jenis:"Cetak & Digital", edisi:"Edisi 2 · 2026", stok:175, stok_min:25,  kode_mk:"TPEN4401", fakultas:"FKIP",  harga:56000, status:"Tersedia" },
+  { kode_lokasi:"OTMP-02", kode_barang:"BA-008", nama:"Kimia Dasar I",                       jenis:"Cetak",           edisi:"Edisi 4 · 2024", stok:0,   stok_min:40,  kode_mk:"PEKI4101", fakultas:"FMIPA",  harga:49000, status:"Habis"    },
+  { kode_lokasi:"OTMP-03", kode_barang:"BA-009", nama:"Teori Komunikasi",                    jenis:"Cetak",           edisi:"Edisi 3 · 2024", stok:88,  stok_min:30,  kode_mk:"SKOM4101", fakultas:"FISIP",  harga:44000, status:"Tersedia" },
+  { kode_lokasi:"OTMP-01", kode_barang:"BA-010", nama:"Akuntansi Biaya",                     jenis:"Cetak & Digital", edisi:"Edisi 2 · 2025", stok:130, stok_min:35,  kode_mk:"EKMA4315", fakultas:"FEB",   harga:53000, status:"Tersedia" },
+  { kode_lokasi:"OTMP-03", kode_barang:"BA-011", nama:"Psikologi Umum",                      jenis:"Digital",         edisi:"Edisi 1 · 2025", stok:999, stok_min:0,   kode_mk:"MKDK4001", fakultas:"FKIP",  harga:28000, status:"Tersedia" },
+  { kode_lokasi:"OTMP-02", kode_barang:"BA-012", nama:"Bahasa Indonesia",                    jenis:"Cetak",           edisi:"Edisi 6 · 2024", stok:15,  stok_min:50,  kode_mk:"MKWU4108", fakultas:"Umum",  harga:35000, status:"Terbatas" },
+];
+/* ════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
+let appData     = [];   // working copy dari dataBahanAjar
+let filtered    = [];
+let sortCol     = '';
+let sortDir     = 1;    // 1 asc, -1 desc
+
+/* ════════════════════════════════════════════
+   BOOT  — langsung jalan karena script di akhir body
+════════════════════════════════════════════ */
+(function boot() {
+  // Salin data dari data.js
+  if (typeof dataBahanAjar !== 'undefined') {
+    appData = dataBahanAjar.map(d => ({ ...d }));
+  }
+
+  startClock();
+  buildLokasiFilter();
+  renderSummary();
+  applyFilter();
+  initSortHeaders();
+
+  // Realtime search
+  document.getElementById('searchBox').addEventListener('input', applyFilter);
+  document.getElementById('filterLokasi').addEventListener('change', applyFilter);
+  document.getElementById('filterJenis').addEventListener('change', applyFilter);
+  document.getElementById('filterStatus').addEventListener('change', applyFilter);
+
+  // ESC closes modal
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+})();
+
+/* ════════════════════════════════════════════
+   CLOCK
+════════════════════════════════════════════ */
+function startClock() {
+  function tick() {
+    document.getElementById('liveClock').textContent =
+      [new Date().getHours(), new Date().getMinutes(), new Date().getSeconds()]
+        .map(v => String(v).padStart(2,'0')).join(':');
+  }
+  tick(); setInterval(tick, 1000);
+}
+
+/* ════════════════════════════════════════════
+   FILTER LOKASI — build dari data
+════════════════════════════════════════════ */
+function buildLokasiFilter() {
+  const sel = document.getElementById('filterLokasi');
+  [...new Set(appData.map(d => d.kode_lokasi))].sort().forEach(loc => {
+    const o = document.createElement('option');
+    o.value = loc; o.textContent = loc;
+    sel.appendChild(o);
+  });
+}
+
+/* ════════════════════════════════════════════
+   SUMMARY CARDS
+════════════════════════════════════════════ */
+function renderSummary() {
+  const cards = [
+    { label:'Total Item',    val: appData.length,                                    icon:'📚', bg:'var(--blue-l)'   },
+    { label:'Tersedia',      val: appData.filter(d=>d.status==='Tersedia').length,   icon:'✅', bg:'var(--green-l)'  },
+    { label:'Stok Terbatas', val: appData.filter(d=>d.status==='Terbatas').length,   icon:'⚠️', bg:'var(--orange-l)' },
+    { label:'Habis',         val: appData.filter(d=>d.status==='Habis').length,       icon:'❌', bg:'var(--red-l)'    },
+  ];
+  document.getElementById('summaryStrip').innerHTML = cards.map(c => `
+    <div class="sum-card">
+      <div class="sum-icon" style="background:${c.bg}">${c.icon}</div>
+      <div>
+        <div class="sum-label">${c.label}</div>
+        <div class="sum-value">${c.val}</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ════════════════════════════════════════════
+   FILTER & SEARCH
+════════════════════════════════════════════ */
+function applyFilter() {
+  const q      = document.getElementById('searchBox').value.toLowerCase().trim();
+  const lokasi = document.getElementById('filterLokasi').value;
+  const jenis  = document.getElementById('filterJenis').value;
+  const status = document.getElementById('filterStatus').value;
+
+  filtered = appData.filter(d => {
+    const matchQ = !q
+      || d.nama.toLowerCase().includes(q)
+      || d.kode_barang.toLowerCase().includes(q)
+      || d.kode_lokasi.toLowerCase().includes(q)
+      || (d.kode_mk||'').toLowerCase().includes(q);
+    return matchQ
+      && (!lokasi || d.kode_lokasi === lokasi)
+      && (!jenis  || d.jenis       === jenis)
+      && (!status || d.status      === status);
+  });
+
+  if (sortCol) doSort(sortCol, false);
+  renderTable();
+}
+
+/* ════════════════════════════════════════════
+   SORT
+════════════════════════════════════════════ */
+function initSortHeaders() {
+  document.querySelectorAll('th[data-col]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col;
+      sortDir = sortCol === col ? sortDir * -1 : 1;
+      sortCol = col;
+      document.querySelectorAll('th').forEach(t => t.classList.remove('sorted'));
+      th.classList.add('sorted');
+      const arrow = th.querySelector('.sort-arrow');
+      if (arrow) arrow.textContent = sortDir === 1 ? '↑' : '↓';
+      doSort(col, true);
+    });
+  });
+}
+function doSort(col, rerender = true) {
+  filtered.sort((a, b) => {
+    const va = a[col], vb = b[col];
+    if (typeof va === 'number') return (va - vb) * sortDir;
+    return String(va).localeCompare(String(vb)) * sortDir;
+  });
+  if (rerender) renderTable();
+}
+
+/* ════════════════════════════════════════════
+   RENDER TABLE
+════════════════════════════════════════════ */
+function renderTable(highlightId = null) {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('countLabel').textContent = `${filtered.length} item`;
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = filtered.map(d => buildRow(d, d.kode_barang === highlightId)).join('');
+}
+
+function buildRow(d, isNew = false) {
+  // Stok bar
+  const isDigital = d.jenis === 'Digital';
+  const pct = isDigital ? 100
+    : d.stok_min > 0 ? Math.min(100, Math.round(d.stok / (d.stok_min * 4) * 100))
+    : Math.min(100, d.stok);
+  const barColor = d.status==='Habis' ? 'var(--red)' : d.status==='Terbatas' ? 'var(--orange)' : 'var(--green)';
+  const stokTxt  = isDigital ? '∞' : d.stok.toLocaleString('id-ID');
+  const warnHtml = (!isDigital && d.stok > 0 && d.stok <= d.stok_min)
+    ? `<div class="stok-warn">⚠ Di bawah minimum (${d.stok_min})</div>` : '';
+
+  // Status badge
+  const sClass = { Tersedia:'s-tersedia', Terbatas:'s-terbatas', Habis:'s-habis' }[d.status] || '';
+
+  // Jenis badge
+  const jClass = { 'Cetak':'jenis-cetak', 'Digital':'jenis-digital', 'Cetak & Digital':'jenis-cetak-digital' }[d.jenis] || '';
+
+  const harga = d.harga ? 'Rp ' + d.harga.toLocaleString('id-ID') : '—';
+
+  return `<tr class="${isNew ? 'new-row' : ''}" data-id="${d.kode_barang}">
+    <td class="td-lokasi">${d.kode_lokasi}</td>
+    <td class="td-kode">${d.kode_barang}</td>
+    <td class="td-nama">
+      ${d.nama}
+      ${d.kode_mk ? `<div class="td-mk">${d.kode_mk} · ${d.fakultas||''}</div>` : ''}
+    </td>
+    <td><span class="badge-jenis ${jClass}">${d.jenis}</span></td>
+    <td class="td-edisi">${d.edisi || '—'}</td>
+    <td>
+      <div class="stok-wrap">
+        <div class="stok-num">${stokTxt}</div>
+        <div class="stok-bar-bg">
+          <div class="stok-bar-fill" style="width:${pct}%;background:${barColor};"></div>
+        </div>
+        ${warnHtml}
+      </div>
+    </td>
+    <td class="td-harga">${harga}</td>
+    <td><span class="badge-status ${sClass}">${d.status}</span></td>
+    <td>
+      <button class="btn-delete" onclick="deleteRow('${d.kode_barang}')" title="Hapus">🗑</button>
+    </td>
+  </tr>`;
+}
+
+/* ════════════════════════════════════════════
+   DELETE
+════════════════════════════════════════════ */
+function deleteRow(id) {
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  if (!row) return;
+  row.style.transition = 'opacity 0.3s, transform 0.3s';
+  row.style.opacity = '0'; row.style.transform = 'translateX(20px)';
+  setTimeout(() => {
+    appData = appData.filter(d => d.kode_barang !== id);
+    applyFilter(); renderSummary();
+    showToast('🗑️', 'Bahan ajar berhasil dihapus.', '#8c1a1a');
+  }, 300);
+}
+
+/* ════════════════════════════════════════════
+   MODAL
+════════════════════════════════════════════ */
+function openModal() {
+  document.getElementById('modalBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  clearErrors();
+}
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+  clearForm();
+}
+function onBackdropClick(e) {
+  if (e.target === document.getElementById('modalBackdrop')) closeModal();
+}
+function clearForm() {
+  ['fLokasi','fKode','fNama','fJenis','fEdisi','fStok','fStokMin','fHarga','fKodeMk']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  clearErrors();
+}
+function clearErrors() {
+  document.querySelectorAll('.form-err').forEach(e => e.classList.remove('show'));
+  document.querySelectorAll('.form-input.err, .form-select.err').forEach(e => e.classList.remove('err'));
+}
+
+/* ════════════════════════════════════════════
+   SUBMIT — buat baris baru via DOM
+════════════════════════════════════════════ */
+function submitForm() {
+  clearErrors();
+  let ok = true;
+
+  function get(id)  { return (document.getElementById(id)?.value || '').trim(); }
+  function err(fId, eId) {
+    document.getElementById(fId)?.classList.add('err');
+    document.getElementById(eId)?.classList.add('show');
+    ok = false;
+  }
+
+  const lokasi = get('fLokasi');
+  const kode   = get('fKode');
+  const nama   = get('fNama');
+  const jenis  = get('fJenis');
+  const edisi  = get('fEdisi');
+  const stokV  = parseInt(get('fStok'));
+  const stokMin= parseInt(get('fStokMin'))  || 0;
+  const harga  = parseInt(get('fHarga'))    || 0;
+  const kodeMk = get('fKodeMk');
+
+  if (!lokasi)            err('fLokasi', 'eLokasi');
+  if (!kode)              err('fKode',   'eKode');
+  if (!nama)              err('fNama',   'eNama');
+  if (!jenis)             err('fJenis',  'eJenis');
+  if (isNaN(stokV) || stokV < 0) err('fStok', 'eStok');
+  if (!ok) return;
+
+  // Auto-derive status
+  let status;
+  if (jenis === 'Digital')       status = 'Tersedia';
+  else if (stokV === 0)          status = 'Habis';
+  else if (stokV <= stokMin)     status = 'Terbatas';
+  else                            status = 'Tersedia';
+
+  const newItem = {
+    kode_lokasi : lokasi,
+    kode_barang : kode,
+    nama, jenis,
+    edisi       : edisi || '—',
+    stok        : jenis === 'Digital' ? 999 : stokV,
+    stok_min    : stokMin,
+    kode_mk     : kodeMk || '',
+    fakultas    : '',
+    harga, status,
+  };
+
+  // Cek duplikat kode
+  if (appData.some(d => d.kode_barang === kode)) {
+    document.getElementById('fKode').classList.add('err');
+    document.getElementById('eKode').textContent = 'Kode barang sudah ada.';
+    document.getElementById('eKode').classList.add('show');
+    return;
+  }
+
+  appData.unshift(newItem);
+  applyFilter();
+  renderSummary();
+  closeModal();
+
+  // Scroll ke baris baru
+  setTimeout(() => {
+    const row = document.querySelector(`tr[data-id="${kode}"]`);
+    if (row) row.scrollIntoView({ behavior:'smooth', block:'center' });
+  }, 120);
+
+  showToast('✅', `"${nama}" berhasil ditambahkan!`, '#1e5c3a');
+}
+
+/* ════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════ */
+function showToast(icon, msg, bg = '#1c1c1e') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.style.background = bg;
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => {
+    t.style.transition = 'opacity 0.3s, transform 0.3s';
+    t.style.opacity = '0'; t.style.transform = 'translateY(8px)';
+    setTimeout(() => t.remove(), 350);
+  }, 3200);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tracking Pengiriman — SITTA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f0;
+      --surface: #ffffff;
+      --surface2: #eeecea;
+      --border: #e0ddd8;
+      --accent: #1a3a5c;
+      --accent2: #2a5f8f;
+      --accent-light: #e8f0f8;
+      --text: #1c1c1e;
+      --muted: #6b6b72;
+      --green: #1e5c3a;
+      --green-l: #e6f5ee;
+      --orange: #c05a00;
+      --orange-l: #fff3e8;
+      --red: #8c1a1a;
+      --red-l: #fdf0f0;
+      --blue: #1a3a5c;
+      --blue-l: #e8f0f8;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 12px;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .time-chip {
+      font-size: 12px; color: var(--muted);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 12px;
+      font-family: 'Space Mono', monospace; letter-spacing: 0.5px;
+    }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── PAGE TITLE BAR ── */
+    .page-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .page-header-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: #e6f5ee;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .page-header-title { font-size: 17px; font-weight: 800; color: var(--text); }
+    .page-header-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+    /* ── MAIN ── */
+    .main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 36px 24px 80px;
+    }
+
+    /* ── SEARCH BOX ── */
+    .search-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 28px;
+      margin-bottom: 32px;
+      animation: fadeUp 0.4s ease both;
+    }
+    .search-card-title {
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 16px;
+    }
+    .search-row {
+      display: flex; gap: 12px; align-items: stretch;
+    }
+    .search-input-wrap {
+      flex: 1;
+      position: relative;
+    }
+    .search-prefix {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 12px; font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 3px 8px; border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .search-input {
+      width: 100%;
+      height: 48px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0 16px 0 78px;
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      letter-spacing: 0.5px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input::placeholder { color: #aaa; font-size: 13px; letter-spacing: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .search-input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(42,95,143,0.12); }
+    .search-btn {
+      height: 48px;
+      padding: 0 24px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .search-btn:hover { background: var(--accent2); }
+    .search-btn:active { transform: scale(0.97); }
+    .search-btn.loading { opacity: 0.7; pointer-events: none; }
+
+    .search-examples {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+    }
+    .example-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--accent);
+    }
+    .example-chip:hover { background: var(--accent-light); border-color: var(--accent); }
+
+    /* ── RESULT AREA ── */
+    #resultArea { display: none; animation: fadeUp 0.5s ease both; }
+    #resultArea.visible { display: block; }
+
+    /* ── STATUS BADGE ── */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .status-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; }
+    .status-delivered { background: var(--green-l); color: var(--green); }
+    .status-delivered::before { background: var(--green); }
+    .status-transit { background: var(--orange-l); color: var(--orange); }
+    .status-transit::before { background: var(--orange); animation: pulse 1.4s infinite; }
+    .status-pending { background: #f5f5f5; color: #666; }
+    .status-pending::before { background: #999; }
+    .status-failed { background: var(--red-l); color: var(--red); }
+    .status-failed::before { background: var(--red); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── SUMMARY CARD ── */
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .summary-top {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .summary-do {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px; color: var(--muted);
+      margin-bottom: 4px; letter-spacing: 1px;
+    }
+    .summary-name {
+      font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.2;
+    }
+    .summary-program {
+      font-size: 13px; color: var(--muted); margin-top: 4px;
+    }
+
+    /* ── PROGRESS TRACK ── */
+    .progress-section {
+      margin: 24px 0 20px;
+    }
+    .progress-track {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-top: 6px;
+    }
+    .progress-line-bg {
+      position: absolute;
+      top: 16px; left: 5%; right: 5%;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      z-index: 0;
+    }
+    .progress-line-fill {
+      position: absolute;
+      top: 16px; left: 5%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--green), #2eb872);
+      border-radius: 2px;
+      z-index: 1;
+      transition: width 1s cubic-bezier(0.4,0,0.2,1);
+      width: 0%;
+    }
+    .progress-step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+    .step-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      border: 2.5px solid var(--border);
+      background: var(--surface);
+      transition: all 0.4s ease;
+      position: relative;
+    }
+    .step-dot.done {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+    .step-dot.active {
+      background: var(--surface);
+      border-color: var(--orange);
+      box-shadow: 0 0 0 5px rgba(192,90,0,0.15);
+    }
+    .step-dot.active .step-icon { animation: bounce 1s infinite; }
+    @keyframes bounce {
+      0%,100% { transform: none; }
+      50% { transform: translateY(-2px); }
+    }
+    .step-label {
+      font-size: 10.5px; font-weight: 600; text-align: center;
+      color: var(--muted); margin-top: 8px; line-height: 1.4;
+      max-width: 70px;
+    }
+    .step-label.done { color: var(--green); }
+    .step-label.active { color: var(--orange); }
+    .step-date {
+      font-size: 9.5px;
+      font-family: 'Space Mono', monospace;
+      color: var(--muted);
+      margin-top: 3px; text-align: center;
+    }
+
+    /* ── DETAIL GRID ── */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .detail-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .detail-card.full { grid-column: 1 / -1; }
+    .detail-label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .detail-label-icon { font-size: 13px; }
+    .detail-row {
+      display: flex; justify-content: space-between;
+      align-items: baseline; padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+    .detail-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .detail-key { font-size: 12.5px; color: var(--muted); }
+    .detail-val {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      text-align: right;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .detail-val.mono { font-family: 'Space Mono', monospace; font-size: 12px; }
+    .detail-val.total {
+      font-size: 15px; font-weight: 800;
+      color: var(--accent);
+    }
+
+    /* ── RIWAYAT TIMELINE ── */
+    .timeline-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .timeline-title {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 18px;
+    }
+    .timeline { list-style: none; position: relative; padding-left: 28px; }
+    .timeline::before {
+      content: '';
+      position: absolute; left: 7px; top: 6px; bottom: 6px;
+      width: 2px; background: var(--border); border-radius: 2px;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 18px;
+      animation: fadeUp 0.4s ease both;
+    }
+    .timeline-item:last-child { margin-bottom: 0; }
+    .timeline-dot {
+      position: absolute; left: -24px; top: 4px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2.5px solid var(--border);
+      background: var(--surface);
+    }
+    .timeline-dot.green { background: var(--green); border-color: var(--green); }
+    .timeline-dot.orange { background: var(--orange); border-color: var(--orange); }
+    .timeline-dot.gray { background: #ccc; border-color: #ccc; }
+    .timeline-time {
+      font-size: 10px; color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 2px;
+    }
+    .timeline-event { font-size: 13px; font-weight: 600; color: var(--text); }
+    .timeline-loc { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+    /* ── NOT FOUND ── */
+    #notFound {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px 28px;
+      text-align: center;
+      animation: fadeUp 0.4s ease both;
+    }
+    #notFound.visible { display: block; }
+    .nf-icon { font-size: 48px; margin-bottom: 12px; }
+    .nf-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .nf-sub { font-size: 13px; color: var(--muted); }
+    .nf-do { font-family: 'Space Mono', monospace; color: var(--accent); font-weight: 700; }
+
+    /* ── LOADING SKELETON ── */
+    #loadingState { display: none; }
+    #loadingState.visible { display: block; }
+    .skeleton-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+    .skel {
+      background: linear-gradient(90deg, var(--surface2) 25%, #e8e6e1 50%, var(--surface2) 75%);
+      background-size: 300% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @media (max-width: 600px) {
+      .topbar { padding: 0 16px; }
+      .page-header { padding: 16px; }
+      .main { padding: 20px 16px 60px; }
+      .search-card { padding: 18px 16px; }
+      .search-row { flex-direction: column; }
+      .search-btn { width: 100%; justify-content: center; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .detail-card.full { grid-column: 1; }
+      .summary-top { flex-direction: column; }
+      .step-label { font-size: 9px; max-width: 55px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="back-btn" href="dashboard.html">← Kembali</a>
+    <div class="logo">
+      <div class="logo-dot"></div>
+      SITTA
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="time-chip" id="liveClock">00:00:00</div>
+    <div class="avatar">AD</div>
+  </div>
+</header>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-icon">🚚</div>
+  <div>
+    <div class="page-header-title">Tracking Pengiriman</div>
+    <div class="page-header-sub">Pantau status pengiriman bahan ajar secara real-time</div>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- SEARCH -->
+  <div class="search-card">
+    <div class="search-card-title">Lacak Nomor DO</div>
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <span class="search-prefix">DO</span>
+        <input
+          class="search-input"
+          id="doInput"
+          type="text"
+          placeholder="Masukkan nomor DO (contoh: 2026-0002)"
+          maxlength="30"
+        />
+      </div>
+      <button class="search-btn" id="searchBtn" onclick="handleSearch()">
+        <span id="btnIcon">🔍</span>
+        <span id="btnLabel">Cari</span>
+      </button>
+    </div>
+    <div class="search-examples">
+      <span style="margin-right:2px;">Coba:</span>
+      <span class="example-chip" onclick="fillAndSearch('2026-0001')">2026-0001</span>
+      <span class="example-chip" onclick="fillAndSearch('2026-0042')">2026-0042</span>
+      <span class="example-chip" onclick="fillAndSearch('2026-0099')">2026-0099</span>
+      <span class="example-chip" onclick="fillAndSearch('2026-0120')">2026-0120</span>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loadingState">
+    <div class="skeleton-card">
+      <div class="skel" style="height:14px;width:30%;margin-bottom:10px;"></div>
+      <div class="skel" style="height:28px;width:60%;margin-bottom:6px;"></div>
+      <div class="skel" style="height:14px;width:40%;margin-bottom:24px;"></div>
+      <div class="skel" style="height:60px;width:100%;"></div>
+    </div>
+    <div class="skeleton-card">
+      <div class="skel" style="height:14px;width:25%;margin-bottom:16px;"></div>
+      <div class="skel" style="height:14px;width:100%;margin-bottom:8px;"></div>
+      <div class="skel" style="height:14px;width:80%;margin-bottom:8px;"></div>
+      <div class="skel" style="height:14px;width:90%;"></div>
+    </div>
+  </div>
+
+  <!-- NOT FOUND -->
+  <div id="notFound">
+    <div class="nf-icon">📭</div>
+    <div class="nf-title">Nomor DO tidak ditemukan</div>
+    <p class="nf-sub">DO <span class="nf-do" id="notFoundDO"></span> tidak ada dalam sistem.<br/>Periksa kembali nomor yang Anda masukkan.</p>
+  </div>
+
+  <!-- RESULT -->
+  <div id="resultArea">
+
+    <!-- SUMMARY -->
+    <div class="summary-card">
+      <div class="summary-top">
+        <div>
+          <div class="summary-do" id="rDO">DO/2026/000</div>
+          <div class="summary-name" id="rName">—</div>
+          <div class="summary-program" id="rProgram">—</div>
+        </div>
+        <div id="rStatusBadge"></div>
+      </div>
+
+      <!-- PROGRESS TRACK -->
+      <div class="progress-section">
+        <div class="progress-track" id="progressTrack">
+          <div class="progress-line-bg"></div>
+          <div class="progress-line-fill" id="progressFill"></div>
+          <!-- steps inserted by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL GRID -->
+    <div class="detail-grid">
+      <!-- Ekspedisi -->
+      <div class="detail-card">
+        <div class="detail-label"><span class="detail-label-icon">🏢</span> Ekspedisi</div>
+        <div class="detail-row"><span class="detail-key">Kurir</span><span class="detail-val" id="dKurir">—</span></div>
+        <div class="detail-row"><span class="detail-key">No. Resi</span><span class="detail-val mono" id="dResi">—</span></div>
+        <div class="detail-row"><span class="detail-key">Layanan</span><span class="detail-val" id="dLayanan">—</span></div>
+      </div>
+      <!-- Waktu -->
+      <div class="detail-card">
+        <div class="detail-label"><span class="detail-label-icon">📅</span> Jadwal</div>
+        <div class="detail-row"><span class="detail-key">Tgl. Order</span><span class="detail-val mono" id="dTglOrder">—</span></div>
+        <div class="detail-row"><span class="detail-key">Tgl. Kirim</span><span class="detail-val mono" id="dTglKirim">—</span></div>
+        <div class="detail-row"><span class="detail-key">Est. Tiba</span><span class="detail-val mono" id="dEstTiba">—</span></div>
+      </div>
+      <!-- Paket -->
+      <div class="detail-card">
+        <div class="detail-label"><span class="detail-label-icon">📦</span> Detail Paket</div>
+        <div class="detail-row"><span class="detail-key">Jenis</span><span class="detail-val" id="dJenis">—</span></div>
+        <div class="detail-row"><span class="detail-key">Jumlah Item</span><span class="detail-val" id="dJumlah">—</span></div>
+        <div class="detail-row"><span class="detail-key">Berat</span><span class="detail-val" id="dBerat">—</span></div>
+      </div>
+      <!-- Pembayaran -->
+      <div class="detail-card">
+        <div class="detail-label"><span class="detail-label-icon">💳</span> Pembayaran</div>
+        <div class="detail-row"><span class="detail-key">Ongkos Kirim</span><span class="detail-val" id="dOngkir">—</span></div>
+        <div class="detail-row"><span class="detail-key">Biaya Asuransi</span><span class="detail-val" id="dAsuransi">—</span></div>
+        <div class="detail-row"><span class="detail-key">Total</span><span class="detail-val total" id="dTotal">—</span></div>
+      </div>
+      <!-- Tujuan -->
+      <div class="detail-card full">
+        <div class="detail-label"><span class="detail-label-icon">📍</span> Tujuan Pengiriman</div>
+        <div class="detail-row"><span class="detail-key">Penerima</span><span class="detail-val" id="dPenerima">—</span></div>
+        <div class="detail-row"><span class="detail-key">Unit / UPBJJ</span><span class="detail-val" id="dUpbjj">—</span></div>
+        <div class="detail-row"><span class="detail-key">Alamat</span><span class="detail-val" id="dAlamat" style="max-width:60%;text-align:right;line-height:1.5;">—</span></div>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline-card">
+      <div class="timeline-title">📋 Riwayat Perjalanan</div>
+      <ul class="timeline" id="timelineList"></ul>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+/* ══════════════════════════════════════════
+   DATA SIMULASI — nanti bisa diganti API fetch
+   ══════════════════════════════════════════ */
+const DATA = {
+  "2026-0001": {
+    nama: "Andriana Wisnu",
+    nim: "044891234",
+    program: "S1 Manajemen · UPBJJ Serang",
+    status: "delivered",      // delivered | transit | pending | failed
+    statusLabel: "Terkirim",
+    do: "DO/2024/000001",
+    kurir: "JNE Express",
+    resi: "JNE2024112500089",
+    layanan: "YES (Yakin Esok Sampai)",
+    tglOrder: "02 Mei 2026",
+    tglKirim: "02 Mei 2026",
+    estTiba: "04 Mei 2026",
+    jenis: "Bahan Ajar Cetak",
+    jumlah: "6 Buku",
+    berat: "2,4 kg",
+    ongkir: "Rp 28.000",
+    asuransi: "Rp 2.500",
+    total: "Rp 30.500",
+    penerima: "Andriana Wisnu",
+    upbjj: "UPBJJ-UT Serang",
+    alamat: "Jl. Raya Serang No. 54, pakupatan, Serang, Banten 60241",
+    progressStep: 4,   // 0-based index of active/last step
+    history: [
+      { time: "04 Mei 2026 · 14:23", event: "Paket Diterima", loc: "Serang, Banten", color: "green" },
+      { time: "04 Mei 2026 · 09:11", event: "Dalam Pengiriman ke Penerima", loc: "Pusat DC JNE Serang", color: "green" },
+      { time: "03 Mei 2026 · 22:45", event: "Tiba di Gudang Transit", loc: "Hub JNE Serang", color: "green" },
+      { time: "03 Mei 2026 · 16:00", event: "Berangkat dari Gudang Asal", loc: "Gudang UT Pusat, Tangerang", color: "green" },
+      { time: "03 Mei 2026 · 09:30", event: "Paket Dijemput Kurir", loc: "Gudang UT Pusat, Tangerang", color: "green" },
+      { time: "02 Mei 2026 · 15:00", event: "DO Dibuat & Diproses", loc: "Sistem SITTA", color: "green" },
+    ]
+  },
+  "2026-0042": {
+    nama: "Eugenia Griseldis",
+    nim: "041567890",
+    program: "S1 Akuntansi · UPBJJ Bandung",
+    status: "transit",
+    statusLabel: "Dalam Perjalanan",
+    do: "DO/2024/000042",
+    kurir: "TIKI",
+    resi: "TIKI20241203X00042",
+    layanan: "ONS (Over Night Service)",
+    tglOrder: "03 Mei 2026",
+    tglKirim: "04 Mei 2026",
+    estTiba: "05 Mei 2026",
+    jenis: "Bahan Ajar Cetak & Digital",
+    jumlah: "4 Buku + 1 Flashdisk",
+    berat: "1,8 kg",
+    ongkir: "Rp 22.000",
+    asuransi: "Rp 2.000",
+    total: "Rp 24.000",
+    penerima: "Eugenia Griseldis",
+    upbjj: "UPBJJ-UT Bandung",
+    alamat: "Jl. Soekarno-Hatta No. 180, Bandung, Jawa Barat 40223",
+    progressStep: 2,
+    history: [
+      { time: "04 Mei 2026 · 20:15", event: "Dalam Perjalanan ke Bandung", loc: "Hub TIKI Jakarta Selatan", color: "orange" },
+      { time: "04 Mei 2026 · 14:30", event: "Tiba di Sortir Pusat", loc: "Gudang TIKI Jakarta", color: "green" },
+      { time: "04 Mei 2026 · 08:00", event: "Paket Dijemput Kurir", loc: "Gudang UT Pusat, Tangerang", color: "green" },
+      { time: "03 Mei 2026 · 16:00", event: "DO Dibuat & Diproses", loc: "Sistem SITTA", color: "green" },
+    ]
+  },
+  "2026-0099": {
+    nama: "Asep Saepudin",
+    nim: "048234567",
+    program: "S1 Ilmu Komunikasi · UPBJJ Yogyakarta",
+    status: "pending",
+    statusLabel: "Menunggu Pickup",
+    do: "DO/2024/000099",
+    kurir: "SiCepat",
+    resi: "SC20241205000099",
+    layanan: "REG (Reguler)",
+    tglOrder: "05 Mei 2026",
+    tglKirim: "06 Mei 2026",
+    estTiba: "08 Mei 2026",
+    jenis: "Bahan Ajar Cetak",
+    jumlah: "8 Buku",
+    berat: "3,2 kg",
+    ongkir: "Rp 18.000",
+    asuransi: "Rp 2.000",
+    total: "Rp 20.000",
+    penerima: "Dwi Lestari Anggraeni",
+    upbjj: "UPBJJ-UT Yogyakarta",
+    alamat: "Jl. Colombo No. 1, Depok, Sleman, Yogyakarta 55281",
+    progressStep: 0,
+    history: [
+      { time: "05 Mei 2026 · 16:00", event: "DO Dibuat — Menunggu Pickup", loc: "Sistem SITTA", color: "gray" },
+    ]
+  },
+  "2026-0120": {
+    nama: "Ahmad Fauzan Hidayat",
+    nim: "046789012",
+    program: "S1 Hukum · UPBJJ Medan",
+    status: "failed",
+    statusLabel: "Gagal Kirim",
+    do: "DO/2024/000120",
+    kurir: "J&T Express",
+    resi: "JT20241201000120",
+    layanan: "EZ (Express)",
+    tglOrder: "01 Mei 2026",
+    tglKirim: "02 Mei 2026",
+    estTiba: "04 Mei 2026",
+    jenis: "Bahan Ajar Cetak",
+    jumlah: "5 Buku",
+    berat: "2,0 kg",
+    ongkir: "Rp 35.000",
+    asuransi: "Rp 2.500",
+    total: "Rp 37.500",
+    penerima: "Ahmad Fauzan Hidayat",
+    upbjj: "UPBJJ-UT Medan",
+    alamat: "Jl. Universitas No. 9A, Medan Baru, Kota Medan, Sumatera Utara 20155",
+    progressStep: 2,
+    history: [
+      { time: "04 Mei 2026 · 13:00", event: "Gagal Dikirim — Alamat Tidak Ditemukan", loc: "Medan, Sumatera Utara", color: "orange" },
+      { time: "04 Mei 2026 · 07:30", event: "Kurir Menuju Lokasi", loc: "DC J&T Medan", color: "green" },
+      { time: "03 Mei 2026 · 23:00", event: "Tiba di Gudang Transit", loc: "Hub J&T Medan", color: "green" },
+      { time: "02 Mei 2026 · 15:00", event: "Berangkat dari Gudang Asal", loc: "Gudang UT Pusat, Tangerang", color: "green" },
+      { time: "02 Mei 2026 · 09:00", event: "Paket Dijemput Kurir", loc: "Gudang UT Pusat, Tangerang", color: "green" },
+      { time: "01 Mei 2026 · 16:00", event: "DO Dibuat & Diproses", loc: "Sistem SITTA", color: "green" },
+    ]
+  }
+};
+
+const STEPS = [
+  { label: "DO Dibuat", icon: "📝" },
+  { label: "Dijemput Kurir", icon: "🏭" },
+  { label: "Dalam Transit", icon: "🚚" },
+  { label: "Tiba di Tujuan", icon: "📍" },
+  { label: "Diterima", icon: "✅" },
+];
+
+const STATUS_STEP = {
+  pending: 0,
+  transit: 2,
+  delivered: 4,
+  failed: 2,
+};
+
+/* ── Clock ── */
+function updateClock() {
+  const now = new Date();
+  const t = [now.getHours(), now.getMinutes(), now.getSeconds()]
+    .map(v => String(v).padStart(2,'0')).join(':');
+  document.getElementById('liveClock').textContent = t;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ── Fill example ── */
+function fillAndSearch(val) {
+  document.getElementById('doInput').value = val;
+  handleSearch();
+}
+
+/* ── Enter key ── */
+document.getElementById('doInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleSearch();
+});
+
+/* ── MAIN SEARCH ── */
+function handleSearch() {
+  const raw = document.getElementById('doInput').value.trim();
+  const key = raw.replace(/^DO[\/\s]?/i, '').trim();
+
+  hide('resultArea'); hide('notFound');
+  show('loadingState');
+
+  setTimeout(() => {
+    hide('loadingState');
+    const d = DATA[key];
+    if (!d) {
+      document.getElementById('notFoundDO').textContent = raw || '(kosong)';
+      show('notFound');
+      return;
+    }
+    renderResult(d);
+    show('resultArea');
+    // animate progress bar after slight delay
+    setTimeout(() => animateProgress(d), 120);
+  }, 800);
+}
+
+function show(id) { document.getElementById(id).classList.add('visible'); }
+function hide(id) { document.getElementById(id).classList.remove('visible'); }
+
+/* ── RENDER ── */
+function renderResult(d) {
+  // summary
+  set('rDO', d.do);
+  set('rName', d.nama);
+  set('rProgram', d.program);
+
+  const statusMap = {
+    delivered: 'status-delivered',
+    transit:   'status-transit',
+    pending:   'status-pending',
+    failed:    'status-failed',
+  };
+  document.getElementById('rStatusBadge').innerHTML =
+    `<span class="status-badge ${statusMap[d.status]}">${d.statusLabel}</span>`;
+
+  // progress steps
+  buildProgress(d);
+
+  // details
+  set('dKurir', d.kurir);
+  set('dResi', d.resi);
+  set('dLayanan', d.layanan);
+  set('dTglOrder', d.tglOrder);
+  set('dTglKirim', d.tglKirim);
+  set('dEstTiba', d.estTiba);
+  set('dJenis', d.jenis);
+  set('dJumlah', d.jumlah);
+  set('dBerat', d.berat);
+  set('dOngkir', d.ongkir);
+  set('dAsuransi', d.asuransi);
+  set('dTotal', d.total);
+  set('dPenerima', d.penerima);
+  set('dUpbjj', d.upbjj);
+  set('dAlamat', d.alamat);
+
+  // timeline
+  const ul = document.getElementById('timelineList');
+  ul.innerHTML = '';
+  d.history.forEach((h, i) => {
+    const li = document.createElement('li');
+    li.className = 'timeline-item';
+    li.style.animationDelay = `${i * 0.06}s`;
+    li.innerHTML = `
+      <div class="timeline-dot ${h.color}"></div>
+      <div class="timeline-time">${h.time}</div>
+      <div class="timeline-event">${h.event}</div>
+      <div class="timeline-loc">📍 ${h.loc}</div>
+    `;
+    ul.appendChild(li);
+  });
+}
+
+function buildProgress(d) {
+  const track = document.getElementById('progressTrack');
+  // clear previous steps (keep line divs)
+  track.querySelectorAll('.progress-step').forEach(el => el.remove());
+
+  const activeIdx = STATUS_STEP[d.status];
+
+  STEPS.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'progress-step';
+
+    let dotClass = '';
+    let labelClass = '';
+    if (i < activeIdx) { dotClass = 'done'; labelClass = 'done'; }
+    else if (i === activeIdx) {
+      dotClass = d.status === 'delivered' ? 'done' : 'active';
+      labelClass = d.status === 'delivered' ? 'done' : 'active';
+    }
+
+    div.innerHTML = `
+      <div class="step-dot ${dotClass}">
+        <span class="step-icon">${dotClass === 'done' ? '✓' : s.icon}</span>
+      </div>
+      <div class="step-label ${labelClass}">${s.label}</div>
+    `;
+    track.appendChild(div);
+  });
+}
+
+function animateProgress(d) {
+  const fill = document.getElementById('progressFill');
+  const activeIdx = STATUS_STEP[d.status];
+  const pct = (activeIdx / (STEPS.length - 1)) * 90;
+  fill.style.width = pct + '%';
+}
+
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0c0f1a;
+      --card: #141828;
+      --border: #232842;
+      --accent: #6c63ff;
+      --accent-hover: #8a83ff;
+      --accent-glow: rgba(108,99,255,0.25);
+      --text: #eef0f8;
+      --muted: #7b80a0;
+      --danger: #ff5e7a;
+      --danger-bg: rgba(255,94,122,0.08);
+      --success: #3ddc97;
+      --input-bg: #1a1f35;
+      --input-border: #2a2f4a;
+      --input-focus: #6c63ff;
+      --overlay: rgba(6,8,18,0.85);
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Background orbs */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: 0;
+      pointer-events: none;
+    }
+    body::before {
+      width: 420px; height: 420px;
+      background: rgba(108,99,255,0.15);
+      top: -100px; left: -100px;
+    }
+    body::after {
+      width: 360px; height: 360px;
+      background: rgba(61,220,151,0.08);
+      bottom: -80px; right: -80px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 44px 40px 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(108,99,255,0.08);
+      animation: cardIn 0.5s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity:0; transform: translateY(28px) scale(0.97); }
+      to   { opacity:1; transform: none; }
+    }
+
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    /* ── FORM ── */
+    .field { margin-bottom: 18px; }
+    label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    input[type="email"], input[type="password"], input[type="text"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1.5px solid var(--input-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus {
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    input.error { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(255,94,122,0.15); }
+    input::placeholder { color: #3d4260; }
+
+    /* ── ERROR INLINE ── */
+    .error-msg {
+      display: none;
+      align-items: center;
+      gap: 7px;
+      font-size: 12.5px;
+      color: var(--danger);
+      background: var(--danger-bg);
+      border: 1px solid rgba(255,94,122,0.2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 18px;
+      animation: shake 0.35s ease;
+    }
+    .error-msg.show { display: flex; }
+    @keyframes shake {
+      0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}
+    }
+
+    /* ── BUTTON ── */
+    .btn-primary {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-family: 'Sora', sans-serif;
+      font-size: 14.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+    .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 6px 28px rgba(108,99,255,0.4); }
+    .btn-primary:active { transform: scale(0.98); }
+
+    /* ── LINKS ROW ── */
+    .links-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 18px;
+    }
+    .link-btn {
+      background: none;
+      border: none;
+      font-family: 'Sora', sans-serif;
+      font-size: 12.5px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.2s;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .link-btn:hover { color: var(--accent); }
+
+    /* ── DIVIDER ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--overlay);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 380px;
+      position: relative;
+      animation: modalIn 0.3s cubic-bezier(.22,1,.36,1) both;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      margin: 16px;
+    }
+    @keyframes modalIn {
+      from { opacity:0; transform: translateY(20px) scale(0.96); }
+      to   { opacity:1; transform: none; }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: color 0.2s, background 0.2s;
+    }
+    .modal-close:hover { color: var(--text); background: var(--border); }
+
+    .modal-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .modal h2 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .modal p { font-size: 13px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
+
+    .modal .field { margin-bottom: 14px; }
+    .modal .btn-primary { margin-top: 8px; }
+
+    /* success state inside modal */
+    .modal-success {
+      display: none;
+      text-align: center;
+      padding: 12px 0;
+    }
+    .modal-success .icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+    .modal-success p { margin-bottom: 0; text-align: center; }
+    .modal-success.show { display: block; }
+
+    /* register extra fields */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .modal-footer { text-align: center; margin-top: 16px; font-size: 12.5px; color: var(--muted); }
+    .modal-footer button { color: var(--accent); background: none; border: none; font-family: 'Sora',sans-serif; font-size: 12.5px; cursor: pointer; text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN CARD ═══════════════ -->
+<div class="card">
+  <div class="logo">● SITTA</div>
+  <h1>Selamat Datang</h1>
+  <p class="subtitle">Masuk ke akun Anda untuk melanjutkan</p>
+
+  <div id="loginError" class="error-msg">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Email atau password yang Anda masukkan salah.
+  </div>
+
+  <div class="field">
+    <label>Alamat Email</label>
+    <input type="email" id="email" placeholder="nama@email.com" autocomplete="email"/>
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Masukkan password"/>
+  </div>
+
+  <button class="btn-primary" onclick="handleLogin()">Masuk</button>
+
+  <div class="links-row">
+    <button class="link-btn" onclick="openModal('forgotModal')">Lupa Password?</button>
+    <button class="link-btn" onclick="openModal('registerModal')">Belum punya akun? Daftar</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════ MODAL: LUPA PASSWORD ═══════════════ -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('forgotModal')">✕</button>
+    <div class="modal-tag">Pemulihan Akun</div>
+    <h2>Lupa Password</h2>
+    <p>Masukkan email Anda dan kami akan mengirimkan tautan untuk mereset password.</p>
+
+    <div id="forgotForm">
+      <div class="field">
+        <label>Alamat Email</label>
+        <input type="email" id="forgotEmail" placeholder="nama@email.com"/>
+      </div>
+      <button class="btn-primary" onclick="handleForgot()">Kirim Tautan Reset</button>
+    </div>
+
+    <div class="modal-success" id="forgotSuccess">
+      <div class="icon">📩</div>
+      <p>Tautan reset password telah dikirim ke email Anda. Silakan cek kotak masuk Anda.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ MODAL: DAFTAR ═══════════════ -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('registerModal')">✕</button>
+    <div class="modal-tag">Buat Akun</div>
+    <h2>Daftar Sekarang</h2>
+    <p>Isi informasi di bawah ini untuk membuat akun baru.</p>
+
+    <div id="registerError" class="error-msg" style="margin-bottom:14px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="registerErrorText">Harap isi semua kolom.</span>
+    </div>
+
+    <div id="registerForm">
+      <div class="two-col">
+        <div class="field">
+          <label>Nama Depan</label>
+          <input type="text" id="regFirst" placeholder="Budi"/>
+        </div>
+        <div class="field">
+          <label>Nama Belakang</label>
+          <input type="text" id="regLast" placeholder="Santoso"/>
+        </div>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="regEmail" placeholder="nama@email.com"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="regPass" placeholder="Min. 8 karakter"/>
+      </div>
+      <div class="field">
+        <label>Konfirmasi Password</label>
+        <input type="password" id="regPassConfirm" placeholder="Ulangi password"/>
+      </div>
+      <button class="btn-primary" onclick="handleRegister()">Buat Akun</button>
+    </div>
+
+    <div class="modal-success" id="registerSuccess">
+      <div class="icon">🎉</div>
+      <p>Akun berhasil dibuat! Silakan login menggunakan email dan password Anda.</p>
+      <button class="btn-primary" style="margin-top:18px;" onclick="closeModal('registerModal'); openModal(null)">Ke Halaman Login</button>
+    </div>
+
+    <div class="modal-footer">
+      Sudah punya akun? <button onclick="closeModal('registerModal')">Masuk</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  /* ── Data dummy untuk validasi login ── */
+  const VALID_USERS = [
+    { email: "admin@ut.id", password: "admin123" },
+    { email: "admin@sitta.com", password: "admin456" }
+  ];
+
+  /* ── Login ── */
+  function handleLogin() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const emailInput = document.getElementById('email');
+  const passInput = document.getElementById('password');
+  const errorBox = document.getElementById('loginError');
+
+  // Reset ralat sebelum semakan baru
+  emailInput.classList.remove('error');
+  passInput.classList.remove('error');
+  errorBox.classList.remove('show');
+
+  // 1. Semakan input kosong
+  if (!email || !password) {
+    if(!email) emailInput.classList.add('error');
+    if(!password) passInput.classList.add('error');
+    showError(errorBox);
+    return;
+  }
+
+  // 2. Semakan kredential terhadap data dummy[cite: 6]
+  const valid = VALID_USERS.find(u => u.email === email && u.password === password);
+  
+  if (!valid) {
+    // Jika salah, tunjukkan ralat
+    emailInput.classList.add('error');
+    passInput.classList.add('error');
+    showError(errorBox);
+  } else {
+    // Jika betul, simpan sesi ringkas (opsyenal) dan pindah ke dashboard
+    sessionStorage.setItem("userEmail", email);
+    window.location.href = "dashboard.html"; 
+  }
+}
+
+  function showError(el) {
+    el.classList.remove('show');
+    void el.offsetWidth; /* re-trigger animation */
+    el.classList.add('show');
+  }
+
+  /* ── Modal helpers ── */
+  function openModal(id) {
+    if (!id) return;
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+    /* reset modals */
+    if (id === 'forgotModal') {
+      document.getElementById('forgotEmail').value = '';
+      document.getElementById('forgotForm').style.display = '';
+      document.getElementById('forgotSuccess').classList.remove('show');
+    }
+    if (id === 'registerModal') {
+      ['regFirst','regLast','regEmail','regPass','regPassConfirm'].forEach(f => {
+        const el = document.getElementById(f);
+        el.value = '';
+        el.classList.remove('error');
+      });
+      document.getElementById('registerError').classList.remove('show');
+      document.getElementById('registerForm').style.display = '';
+      document.getElementById('registerSuccess').classList.remove('show');
+    }
+  }
+
+  /* Close on overlay click */
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) closeModal(overlay.id);
+    });
+  });
+
+  /* Close on ESC */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
+    }
+  });
+
+  /* ── Lupa Password ── */
+  function handleForgot() {
+    const email = document.getElementById('forgotEmail').value.trim();
+    if (!email || !email.includes('@')) {
+      document.getElementById('forgotEmail').classList.add('error');
+      setTimeout(() => document.getElementById('forgotEmail').classList.remove('error'), 1500);
+      return;
+    }
+    document.getElementById('forgotForm').style.display = 'none';
+    document.getElementById('forgotSuccess').classList.add('show');
+  }
+
+  /* ── Register ── */
+  function handleRegister() {
+    const first = document.getElementById('regFirst').value.trim();
+    const last  = document.getElementById('regLast').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const pass  = document.getElementById('regPass').value;
+    const conf  = document.getElementById('regPassConfirm').value;
+    const errBox = document.getElementById('registerError');
+    const errTxt = document.getElementById('registerErrorText');
+
+    const fields = [
+      { id:'regFirst',       val:first },
+      { id:'regLast',        val:last  },
+      { id:'regEmail',       val:email },
+      { id:'regPass',        val:pass  },
+      { id:'regPassConfirm', val:conf  },
+    ];
+
+    fields.forEach(f => document.getElementById(f.id).classList.remove('error'));
+    errBox.classList.remove('show');
+
+    const empty = fields.filter(f => !f.val);
+    if (empty.length) {
+      empty.forEach(f => document.getElementById(f.id).classList.add('error'));
+      errTxt.textContent = 'Harap isi semua kolom yang wajib diisi.';
+      showError(errBox);
+      return;
+    }
+    if (!email.includes('@')) {
+      document.getElementById('regEmail').classList.add('error');
+      errTxt.textContent = 'Format email tidak valid.';
+      showError(errBox);
+      return;
+    }
+    if (pass.length < 8) {
+      document.getElementById('regPass').classList.add('error');
+      errTxt.textContent = 'Password minimal 8 karakter.';
+      showError(errBox);
+      return;
+    }
+    if (pass !== conf) {
+      document.getElementById('regPass').classList.add('error');
+      document.getElementById('regPassConfirm').classList.add('error');
+      errTxt.textContent = 'Password dan konfirmasi tidak cocok.';
+      showError(errBox);
+      return;
+    }
+
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('registerSuccess').classList.add('show');
+  }
+
+  /* Enter key on login */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !document.querySelector('.modal-overlay.open')) handleLogin();
+  });
+</script>
+</body>
+</html>
